@@ -51,7 +51,7 @@ public class StoreMapper extends AbstractMapper<Store> {
 	PreparedStatement statement = connection.prepareStatement(query);
 	statement.setLong(1, id);
 	ResultSet rset = statement.executeQuery();
-	List<Store> stores = getStoresFromResultSet(rset);
+	List<Store> stores = getElementsFromResultSet(rset);
 	if (stores != null) {
 	    return stores.get(0);
 	}
@@ -62,7 +62,7 @@ public class StoreMapper extends AbstractMapper<Store> {
 	String query = "SELECT * FROM Stores WHERE " + param.toString() + " = '" + value + "'";
 	Statement statement = connection.createStatement();
 	ResultSet rset = statement.executeQuery(query);
-	return getStoresFromResultSet(rset);
+	return getElementsFromResultSet(rset);
     }
     
     private PreparedStatement getInsertStatement(Store store) throws SQLException {
@@ -88,7 +88,8 @@ public class StoreMapper extends AbstractMapper<Store> {
 	return statement;
     }
     
-    private List<Store> getStoresFromResultSet(ResultSet rset) throws SQLException {
+    @Override
+    protected List<Store> getElementsFromResultSet(ResultSet rset) throws SQLException {
 	List<Store> stores = new ArrayList<>();
 	while (rset.next()) {
 	    long id = rset.getLong("Id");

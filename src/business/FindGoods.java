@@ -5,6 +5,12 @@
 package business;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -18,6 +24,7 @@ public class FindGoods {
     public static void main(String[] args) throws IOException {
         // TODO code application logic here
 	
+/*
 	double factor;
 	factor = StringComparator.compare("java developer", "developer java");
 	System.out.println(factor);
@@ -28,7 +35,7 @@ public class FindGoods {
 	factor = StringComparator.compare("java developer", "what is this");
 	System.out.println(factor);
 
-	/*
+/*
 	Store store;
 	store = new Store(0, "Ozon", new java.net.URL("http://www.ozon.ru"),
 	new java.net.URL("http://www.ozon.ru/?context=search&text="),
@@ -44,6 +51,7 @@ public class FindGoods {
 	result = f.getResult();
 	for (Product product : result) {
 	System.out.println(product.toString());
-	}*/
+	}
+*/
     }
 }

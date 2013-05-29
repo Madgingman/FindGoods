@@ -17,12 +17,8 @@ public class Administrator extends User {
 	    throws IllegalArgumentException {
 	super(id, name, surname, email, login, password);
     }
-    public Administrator(long id, String name, String surname, String email, String login, int passHashCode) 
-	    throws IllegalArgumentException {
-	super(id, name, surname, email, login, passHashCode);
-    }
     
     public boolean addStore(String name, java.net.URL url) {
-	return false;
+	return true;
     }
 }

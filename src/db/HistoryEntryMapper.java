@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class HistoryEntryMapper extends AbstractMapper<HistoryEntry> {
     
-    HistoryEntryMapper(Connection connection) {
+    public HistoryEntryMapper(Connection connection) {
 	super(connection);
     }
 
@@ -45,7 +45,7 @@ public class HistoryEntryMapper extends AbstractMapper<HistoryEntry> {
 	PreparedStatement statement = connection.prepareStatement(query);
 	statement.setLong(1, id);
 	ResultSet rset = statement.executeQuery();
-	List<HistoryEntry> history = getHistoryFromResultSet(rset);
+	List<HistoryEntry> history = getElementsFromResultSet(rset);
 	if (history != null) {
 	    return history.get(0);
 	}
@@ -57,7 +57,7 @@ public class HistoryEntryMapper extends AbstractMapper<HistoryEntry> {
 	PreparedStatement statement = connection.prepareStatement(query);
 	statement.setInt(1, amount);
 	ResultSet rset = statement.executeQuery();
-	return getHistoryFromResultSet(rset);
+	return getElementsFromResultSet(rset);
     }
     
     private PreparedStatement getInsertStatement(HistoryEntry historyEntry) 
@@ -66,8 +66,8 @@ public class HistoryEntryMapper extends AbstractMapper<HistoryEntry> {
 		+ "VALUES (?, ?, ?)";
 	PreparedStatement statement = connection.prepareStatement(query);
 	statement.setString(1, historyEntry.getQuery());
-	statement.setDate(2, new java.sql.Date(historyEntry.getLastDate().getTime()));
-	statement.setInt(3, historyEntry.getRating());
+	statement.setDate(2, new java.sql.Date(historyEntry.getDate().getTime()));
+	statement.setLong(3, historyEntry.getRating());
 	return statement;
     }
     
@@ -77,13 +77,14 @@ public class HistoryEntryMapper extends AbstractMapper<HistoryEntry> {
 		+ "Rating = ? WHERE Id = ?";
 	PreparedStatement statement = connection.prepareStatement(query);
 	statement.setString(1, historyEntry.getQuery());
-	statement.setDate(2, new java.sql.Date(historyEntry.getLastDate().getTime()));
-	statement.setInt(3, historyEntry.getRating());
+	statement.setDate(2, new java.sql.Date(historyEntry.getDate().getTime()));
+	statement.setLong(3, historyEntry.getRating());
 	statement.setLong(4, historyEntry.getId());
 	return statement;
     }
 
-    private List<HistoryEntry> getHistoryFromResultSet(ResultSet rset) 
+    @Override
+    protected List<HistoryEntry> getElementsFromResultSet(ResultSet rset) 
 	    throws SQLException {
 	List<HistoryEntry> history = new ArrayList<>();
 	while (rset.next()) {

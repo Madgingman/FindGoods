@@ -102,15 +102,8 @@ public class Finder {
 		}
 	    }
 	    
-	    getResult().add(new Product(
-		    result.size(), 
-		    title, 
-		    "", 
-		    new URL(link), 
-		    new URL(img), 
-		    year, 
-		    price, 
-		    propList));
+	    result.add(new Product(result.size(), title, "", new URL(link), 
+		    new URL(img), year, price, propList));
 	}
 
 	return true;

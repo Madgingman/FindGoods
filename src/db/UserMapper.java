@@ -57,18 +57,22 @@ public class UserMapper extends AbstractMapper<User> {
 	PreparedStatement statement = connection.prepareStatement(query);
 	statement.setLong(1, id);
 	ResultSet rset = statement.executeQuery();
-	List<User> users = getUsersFromResultSet(rset);
+	List<User> users = getElementsFromResultSet(rset);
 	if (users != null) {
 	    return users.get(0);
 	}
 	return null;
     }
     
-    public List<User> findByParam(UserParams param, String value) throws SQLException {
+    public User findByParam(UserParams param, String value) throws SQLException {
 	String query = "SELECT * FROM Users WHERE " + param.toString() + " = '" + value + "'";
 	Statement statement = connection.createStatement();
 	ResultSet rset = statement.executeQuery(query);
-	return getUsersFromResultSet(rset);
+	List<User> users = getElementsFromResultSet(rset);
+	if (users != null) {
+	    return users.get(0);
+	}
+	return null;
     }
 
     private PreparedStatement getInsertStatement(User user, int type) throws SQLException {
@@ -80,7 +84,7 @@ public class UserMapper extends AbstractMapper<User> {
 	statement.setString(3, user.getSurname());
 	statement.setString(4, user.getEmail());
 	statement.setString(5, user.getLogin());
-	statement.setInt(6, user.getPassHashCode());
+	statement.setString(6, user.getPassHashCode());
 	return statement;
     }
 
@@ -92,12 +96,13 @@ public class UserMapper extends AbstractMapper<User> {
 	statement.setString(2, user.getSurname());
 	statement.setString(3, user.getEmail());
 	statement.setString(4, user.getLogin());
-	statement.setInt(5, user.getPassHashCode());
+	statement.setString(5, user.getPassHashCode());
 	statement.setLong(6, user.getId());
 	return statement;
     }
 
-    private List<User> getUsersFromResultSet(ResultSet rset) throws SQLException {
+    @Override
+    protected List<User> getElementsFromResultSet(ResultSet rset) throws SQLException {
 	List<User> users = new ArrayList<>();
 	while (rset.next()) {
 	    long id = rset.getLong("Id");
@@ -106,13 +111,18 @@ public class UserMapper extends AbstractMapper<User> {
 	    String surname = rset.getString("Surname");
 	    String email = rset.getString("Email");
 	    String login = rset.getString("Login");
-	    int passHashCode = rset.getInt("Password");
+	    String passHashCode = rset.getString("Password");
 
+	    User user;
 	    if (type == USER) {
-		users.add(new User(id, name, surname, email, login, passHashCode));
+		user = new User(id, name, surname, email, login, "");
 	    } else if (type == ADMINISTRATOR) {
-		users.add(new Administrator(id, name, surname, email, login, passHashCode));
+		user = new Administrator(id, name, surname, email, login, "");
+	    } else {
+		continue;
 	    }
+	    user.setPassHashCode(passHashCode);
+	    users.add(user);
 	}
 	return users;
     }

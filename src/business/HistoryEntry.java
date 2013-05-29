@@ -13,22 +13,22 @@ import java.util.Date;
 public class HistoryEntry {
     protected long id;
     protected String query;
-    protected Date lastDate;
-    protected int rating;
+    protected Date date;
+    protected long rating;
     
     public HistoryEntry(long id, String query, Date lastDate, int rating) {
 	this.id = id;
 	this.query = query;
-	this.lastDate = lastDate;
+	this.date = lastDate;
 	this.rating = rating;
     }
 
     public void incrementRating() {
-	rating++;
+	this.rating++;
     }
     
     public void updateDate() {
-	lastDate = new Date();
+	this.date = new Date();
     }
     
     /**
@@ -60,30 +60,30 @@ public class HistoryEntry {
     }
 
     /**
-     * @return the lastDate
+     * @return the date
      */
-    public Date getLastDate() {
-	return lastDate;
+    public Date getDate() {
+	return date;
     }
 
     /**
-     * @param lastDate the lastDate to set
+     * @param date the date to set
      */
-    public void setLastDate(Date lastDate) {
-	this.lastDate = lastDate;
+    public void setDate(Date date) {
+	this.date = date;
     }
 
     /**
      * @return the rating
      */
-    public int getRating() {
+    public long getRating() {
 	return rating;
     }
 
     /**
      * @param rating the rating to set
      */
-    public void setRating(int rating) {
+    public void setRating(long rating) {
 	this.rating = rating;
     }
 }
