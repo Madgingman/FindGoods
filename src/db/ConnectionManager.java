@@ -13,18 +13,21 @@ import java.sql.SQLException;
  * @author M
  */
 public class ConnectionManager {
-    private String url;
-    private String username;
-    private String password;
+    private static final String url = "jdbc:derby://localhost:1527/findgoods";
+    private static final String user = "fguser";
+    private static final String password = "iampassword";
     
-    public ConnectionManager(String url, String username, String password) {
-	this.url = url;
-	this.username = username;
-	this.password = password;
+    private static final ConnectionManager instance = new ConnectionManager();
+    
+    private ConnectionManager() {
+    }
+    
+    public static ConnectionManager getInstance() {
+	return instance;
     }
 
     public Connection getConnection() throws SQLException {
-	return DriverManager.getConnection(url + ";create=true", username, password);
+	return DriverManager.getConnection(url /*+ ";create=true"*/, user, password);
     }
 
     public void closeConnection(Connection connection) throws SQLException {

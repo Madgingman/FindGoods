@@ -17,10 +17,7 @@ import java.util.Map;
  * @author M
  */
 public class FindGoods {
-
-    /**
-     * @param args the command line arguments
-     */
+/*
     public static void main(String[] args) throws IOException {
         // TODO code application logic here
 	
@@ -52,6 +49,7 @@ public class FindGoods {
 	for (Product product : result) {
 	System.out.println(product.toString());
 	}
-*/
+
     }
+*/
 }

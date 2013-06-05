@@ -7,6 +7,7 @@ package business;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,7 +22,7 @@ public class Finder {
     protected Store store;
     protected String name;
     protected String producer;
-    protected String productionDate;
+    protected Date productionDate;
     protected long upperPrice;
     protected long lowerPrice;
 
@@ -39,8 +40,8 @@ public class Finder {
      * @see business.ProductCategory
      * @see java.util.GregorianCalendar
      */
-    Finder(Store store, String name, String producer, 
-	    String date, long upperPrice, long lowerPrice) 
+    public Finder(Store store, String name, String producer, 
+	    Date date, long upperPrice, long lowerPrice) 
 	    throws IllegalArgumentException {
 	if (upperPrice < lowerPrice || upperPrice < 0 || lowerPrice < 0) {
 	    throw new IllegalArgumentException();
@@ -58,7 +59,7 @@ public class Finder {
     
     public boolean find() throws IOException {
 	String searchString = name.replace(' ', '+');
-	if (!producer.isEmpty()) {
+	if (producer != null && !producer.isEmpty()) {
 	    searchString += "+" + producer.replace(' ', '+');
 	}
 	Document doc = Jsoup.connect(getStore().getSearchUrl() + searchString).userAgent("Mozilla").get();
@@ -117,7 +118,7 @@ public class Finder {
 	return producer;
     }
 
-    public String getProductionDate() {
+    public Date getProductionDate() {
 	return productionDate;
     }
 

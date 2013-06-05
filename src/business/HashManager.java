@@ -14,10 +14,9 @@ import java.util.logging.Logger;
  *
  * @author M
  */
-public enum HashManager {
-    INSTANCE;
+public class HashManager {
     
-    public String getMD5Hash(String s) {
+    public static String getMD5Hash(String s) {
 	String md5Hash = null;
 	try {
 	    MessageDigest m = MessageDigest.getInstance("MD5");

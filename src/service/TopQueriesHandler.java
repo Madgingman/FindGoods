@@ -7,6 +7,7 @@ package service;
 import business.HistoryEntry;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import db.ConnectionManager;
 import db.HistoryEntryMapper;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,29 +29,27 @@ public class TopQueriesHandler implements HttpHandler {
 
     private HistoryEntryMapper hemapper;
     
-    TopQueriesHandler(Connection connection) {
-	this.hemapper = new HistoryEntryMapper(connection);
+    TopQueriesHandler() {
     }
     
     @Override
     public void handle(HttpExchange he) throws IOException {
 	String response;
-	OutputStream ostream;
-	ostream = he.getResponseBody();
-	
-	URI uri = he.getRequestURI();
-        String query = uri.getRawQuery();
-	if (!query.matches("amount=[0-9]+")) {	// example: amount=345
-	    response = ILLEGAL_PARAMETERS_RESPONSE;
-	    he.sendResponseHeaders(400, response.length()); // 400 is BAD_REQUEST response code
-	    ostream.write(response.getBytes());
-	}
-
+	OutputStream ostream = he.getResponseBody();
 	try {
+	    URI uri = he.getRequestURI();
+	    String query = uri.getRawQuery();
+	    if (!query.matches("amount=[0-9]+")) {	// example: amount=345
+		response = ILLEGAL_PARAMETERS_RESPONSE;
+		he.sendResponseHeaders(400, response.length()); // 400 is BAD_REQUEST response code
+		ostream.write(response.getBytes());
+	    }
+
 	    String token[] = query.split("=");
 	    int amount = Integer.parseInt(token[1]);
+	    hemapper = new HistoryEntryMapper();
 	    List<HistoryEntry> heTopList = hemapper.getTopQueries(amount);
-	    response = (new XMLCreator()).createTopQueries(heTopList);
+	    response = XMLBuilder.createTopQueries(heTopList);
 	    he.sendResponseHeaders(200, response.length());
 	    ostream.write(response.getBytes());
 	} catch (NumberFormatException ex) {
@@ -58,7 +57,7 @@ public class TopQueriesHandler implements HttpHandler {
 	    he.sendResponseHeaders(400, response.length()); // 400 is BAD_REQUEST response code
 	    ostream.write(response.getBytes());
 	} catch (SQLException | IOException | ParserConfigurationException | TransformerException ex) {
-	    response = UNEXPECTED_ERROR_RESPONSE;
+	    response = UNEXPECTED_ERROR_RESPONSE;// + "\nError: " + ex.getMessage();
 	    he.sendResponseHeaders(500, response.length()); // 500 is INTERNAL_SERVER_ERROR response code
 	    ostream.write(response.getBytes());
 	} finally {

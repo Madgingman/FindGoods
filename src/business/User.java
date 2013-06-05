@@ -17,7 +17,7 @@ public class User {
     protected String passHashCode;
 
     /**
-     * @throws IllegalArgumentException if name, login or password is null or 
+     * @throws IllegalArgumentException if name or login is null or 
      * less than 3 symbols long
      */
     public User(long id, String name, String surname, String email, String login, String password) 
@@ -26,8 +26,6 @@ public class User {
             throw new IllegalArgumentException("Illegal name.");
         } else if (login == null || login.length() < 3) {
             throw new IllegalArgumentException("Illegal login.");
-        } else if (password == null || password.length() < 3) {
-	    throw new IllegalArgumentException("Illegal password.");
         }
         
 	this.id = id;
@@ -35,7 +33,7 @@ public class User {
         this.surname = surname;
         this.email = email;
         this.login = login;
-        this.passHashCode = HashManager.INSTANCE.getMD5Hash(password);
+        this.passHashCode = HashManager.getMD5Hash(password);
     }
     
     public long getId() {
@@ -75,7 +73,7 @@ public class User {
     }
 
     public void setPassword(String password) {
-        this.passHashCode = HashManager.INSTANCE.getMD5Hash(password);
+        this.passHashCode = HashManager.getMD5Hash(password);
     }
     
     /**
@@ -83,7 +81,7 @@ public class User {
      * 'else' otherwise
      */
     public boolean comparePassword(String password) {
-	String md5hash = HashManager.INSTANCE.getMD5Hash(password);
+	String md5hash = HashManager.getMD5Hash(password);
         return this.passHashCode.equals(md5hash);
     }
 

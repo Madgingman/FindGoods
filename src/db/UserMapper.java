@@ -22,83 +22,114 @@ public class UserMapper extends AbstractMapper<User> {
 	Email, Login;
     }
     
-    UserMapper(Connection connection) {
-	super(connection);
+    public UserMapper() {
     }
 
     @Override
     public void insert(User user) throws SQLException {
-	PreparedStatement statement;
-	if (user instanceof Administrator) {
-	    statement = getInsertStatement(user, ADMINISTRATOR);
-	} else {
-	    statement = getInsertStatement(user, USER);
+	try (Connection conn = getConnection()) {
+	    PreparedStatement statement = null;
+	    try {
+		if (user instanceof Administrator) {
+		    statement = getInsertStatement(user, ADMINISTRATOR, conn);
+		} else {
+		    statement = getInsertStatement(user, USER, conn);
+		}
+		statement.executeUpdate();
+	    } finally {
+		if (statement != null) {
+		    statement.close();
+		}
+	    }
 	}
-	statement.executeUpdate();
     }
 
     @Override
     public void update(User user) throws SQLException {
-	PreparedStatement statement = getUpdateStatement(user);
-	statement.executeUpdate();
+	try (Connection conn = getConnection()) {
+	    try (PreparedStatement statement = getUpdateStatement(user, conn)) {
+		statement.executeUpdate();
+	    }
+	}
     }
 
     @Override
     public void delete(User user) throws SQLException {
 	String query = "DELETE FROM Users WHERE Id = ?";
-	PreparedStatement statement = connection.prepareStatement(query);
-	statement.setLong(1, user.getId());
-	statement.executeUpdate();
+	try (Connection conn = getConnection()) {
+	    try (PreparedStatement statement = conn.prepareStatement(query)) {
+		statement.setLong(1, user.getId());
+		statement.executeUpdate();
+	    }
+	}
     }
 
     @Override
     public User find(long id) throws SQLException {
 	String query = "SELECT * FROM Users WHERE Id = ?";
-	PreparedStatement statement = connection.prepareStatement(query);
-	statement.setLong(1, id);
-	ResultSet rset = statement.executeQuery();
-	List<User> users = getElementsFromResultSet(rset);
-	if (users != null) {
-	    return users.get(0);
+	try (Connection conn = getConnection()) {
+	    try (PreparedStatement statement = conn.prepareStatement(query)) {
+		statement.setLong(1, id);
+		ResultSet rset = statement.executeQuery();
+		List<User> users = getElementsFromResultSet(rset);
+		if (users != null) {
+		    return users.get(0);
+		}
+		return null;
+	    }
 	}
-	return null;
     }
     
     public User findByParam(UserParams param, String value) throws SQLException {
 	String query = "SELECT * FROM Users WHERE " + param.toString() + " = '" + value + "'";
-	Statement statement = connection.createStatement();
-	ResultSet rset = statement.executeQuery(query);
-	List<User> users = getElementsFromResultSet(rset);
-	if (users != null) {
-	    return users.get(0);
+	try (Connection conn = getConnection()) {
+	    try (Statement statement = conn.createStatement()) {
+		ResultSet rset = statement.executeQuery(query);
+		List<User> users = getElementsFromResultSet(rset);
+		if (users != null && !users.isEmpty()) {
+		    return users.get(0);
+		}
+		return null;
+	    }
 	}
-	return null;
     }
 
-    private PreparedStatement getInsertStatement(User user, int type) throws SQLException {
+    private PreparedStatement getInsertStatement(User user, int type, Connection conn) throws SQLException {
 	String query = "INSERT INTO Users(Type, Name, Surname, Email, Login, "
 		+ "Password) VALUES (?, ?, ?, ?, ?, ?)";
-	PreparedStatement statement = connection.prepareStatement(query);
-	statement.setInt(1, type);
-	statement.setString(2, user.getName());
-	statement.setString(3, user.getSurname());
-	statement.setString(4, user.getEmail());
-	statement.setString(5, user.getLogin());
-	statement.setString(6, user.getPassHashCode());
-	return statement;
+	PreparedStatement statement = null;
+	try {
+	    statement = conn.prepareStatement(query);
+	    statement.setInt(1, type);
+	    statement.setString(2, user.getName());
+	    statement.setString(3, user.getSurname());
+	    statement.setString(4, user.getEmail());
+	    statement.setString(5, user.getLogin());
+	    statement.setString(6, user.getPassHashCode());
+	    return statement;
+	} catch (SQLException ex) {
+	    statement.close();
+	    throw ex;
+	}
     }
 
-    private PreparedStatement getUpdateStatement(User user) throws SQLException {
+    private PreparedStatement getUpdateStatement(User user, Connection conn) throws SQLException {
 	String query = "UPDATE Users SET Name = ?, Surname = ?, Email = ?, "
 		+ "Login = ?, Password = ? WHERE Id = ?";
-	PreparedStatement statement = connection.prepareStatement(query);
-	statement.setString(1, user.getName());
-	statement.setString(2, user.getSurname());
-	statement.setString(3, user.getEmail());
-	statement.setString(4, user.getLogin());
-	statement.setString(5, user.getPassHashCode());
-	statement.setLong(6, user.getId());
-	return statement;
+	PreparedStatement statement = null;
+	try {
+	    statement = conn.prepareStatement(query);
+	    statement.setString(1, user.getName());
+	    statement.setString(2, user.getSurname());
+	    statement.setString(3, user.getEmail());
+	    statement.setString(4, user.getLogin());
+	    statement.setString(5, user.getPassHashCode());
+	    statement.setLong(6, user.getId());
+	    return statement;
+	} catch (SQLException ex) {
+	    statement.close();
+	    throw ex;
+	}
     }
 
     @Override

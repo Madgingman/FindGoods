@@ -21,71 +21,101 @@ public class StoreMapper extends AbstractMapper<Store> {
 	Name, Url;
     }
     
-    StoreMapper(Connection connection) {
-	super(connection);
+    public StoreMapper() {
     }
 
     @Override
     public void insert(Store store) throws SQLException {
-	PreparedStatement statement = getInsertStatement(store);
-	statement.executeUpdate();
+	try (Connection conn = getConnection()) {
+	    try (PreparedStatement statement = getInsertStatement(store, conn)) {
+		statement.executeUpdate();
+	    }
+	}
     }
 
     @Override
     public void update(Store store) throws SQLException {
-	PreparedStatement statement = getUpdateStatement(store);
-	statement.executeUpdate();
+	try (Connection conn = getConnection()) {
+	    try (PreparedStatement statement = getUpdateStatement(store, conn)) {
+		statement.executeUpdate();
+	    }
+	}
     }
 
     @Override
     public void delete(Store store) throws SQLException {
 	String query = "DELETE FROM Stores WHERE Id = ?";
-	PreparedStatement statement = connection.prepareStatement(query);
-	statement.setLong(1, store.getId());
-	statement.executeUpdate();
+	try (Connection conn = getConnection()) {
+	    try (PreparedStatement statement = conn.prepareStatement(query)) {
+		statement.setLong(1, store.getId());
+		statement.executeUpdate();
+	    }
+	}
     }
 
     @Override
     public Store find(long id) throws SQLException {
 	String query = "SELECT * FROM Stores WHERE Id = ?";
-	PreparedStatement statement = connection.prepareStatement(query);
-	statement.setLong(1, id);
-	ResultSet rset = statement.executeQuery();
-	List<Store> stores = getElementsFromResultSet(rset);
-	if (stores != null) {
-	    return stores.get(0);
+	try (Connection conn = getConnection()) {
+	    try (PreparedStatement statement = conn.prepareStatement(query)) {
+		statement.setLong(1, id);
+		ResultSet rset = statement.executeQuery();
+		List<Store> stores = getElementsFromResultSet(rset);
+		if (stores != null) {
+		    return stores.get(0);
+		}
+		return null;
+	    }
 	}
-	return null;
     }
     
-    public List<Store> findByParam(StoreParams param, String value) throws SQLException {
+    public Store findByParam(StoreParams param, String value) throws SQLException {
 	String query = "SELECT * FROM Stores WHERE " + param.toString() + " = '" + value + "'";
-	Statement statement = connection.createStatement();
-	ResultSet rset = statement.executeQuery(query);
-	return getElementsFromResultSet(rset);
+	try (Connection conn = getConnection()) {
+	    try (Statement statement = conn.createStatement()) {
+		ResultSet rset = statement.executeQuery(query);
+		List<Store> stores = getElementsFromResultSet(rset);
+		if (stores != null && !stores.isEmpty()) {
+		    return stores.get(0);
+		}
+		return null;
+	    }
+	}
     }
     
-    private PreparedStatement getInsertStatement(Store store) throws SQLException {
+    private PreparedStatement getInsertStatement(Store store, Connection conn) throws SQLException {
 	String query = "INSERT INTO Stores(Name, Url, SearchUrl, PropertyFile) "
 		+ "VALUES (?, ?, ?, ?)";
-	PreparedStatement statement = connection.prepareStatement(query);
-	statement.setString(1, store.getName());
-	statement.setString(2, store.getUrl().toExternalForm());
-	statement.setString(3, store.getSearchUrl().toExternalForm());
-	statement.setString(4, store.getPropFile());
-	return statement;
+	PreparedStatement statement = null;
+	try {
+	    statement = conn.prepareStatement(query);
+	    statement.setString(1, store.getName());
+	    statement.setString(2, store.getUrl().toExternalForm());
+	    statement.setString(3, store.getSearchUrl().toExternalForm());
+	    statement.setString(4, store.getPropFile());
+	    return statement;
+	} catch (SQLException ex) {
+	    statement.close();
+	    throw ex;
+	}
     }
 
-    private PreparedStatement getUpdateStatement(Store store) throws SQLException {
+    private PreparedStatement getUpdateStatement(Store store, Connection conn) throws SQLException {
 	String query = "UPDATE Stores SET Name = ?, Url = ?, SearchUrl = ?, "
 		+ "PropertyFile = ? WHERE Id = ?";
-	PreparedStatement statement = connection.prepareStatement(query);
-	statement.setString(1, store.getName());
-	statement.setString(2, store.getUrl().toExternalForm());
-	statement.setString(3, store.getSearchUrl().toExternalForm());
-	statement.setString(4, store.getPropFile());
-	statement.setLong(5, store.getId());
-	return statement;
+	PreparedStatement statement = null;
+	try {
+	    statement = conn.prepareStatement(query);
+	    statement.setString(1, store.getName());
+	    statement.setString(2, store.getUrl().toExternalForm());
+	    statement.setString(3, store.getSearchUrl().toExternalForm());
+	    statement.setString(4, store.getPropFile());
+	    statement.setLong(5, store.getId());
+	    return statement;
+	} catch (SQLException ex) {
+	    statement.close();
+	    throw ex;
+	}
     }
     
     @Override

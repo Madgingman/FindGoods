@@ -15,10 +15,8 @@ import java.util.List;
  * @author M
  */
 public abstract class AbstractMapper<T> {
-    protected Connection connection;
 
-    public AbstractMapper(Connection connection) {
-	this.connection = connection;
+    public AbstractMapper() {
     }
 
     protected abstract void insert(T object) throws SQLException;
@@ -26,4 +24,8 @@ public abstract class AbstractMapper<T> {
     protected abstract void delete(T object) throws SQLException;
     protected abstract T find(long id) throws SQLException;
     protected abstract List<T> getElementsFromResultSet(ResultSet rset) throws SQLException;
+    
+    protected Connection getConnection() throws SQLException {
+	return ConnectionManager.getInstance().getConnection();
+    }
 }
