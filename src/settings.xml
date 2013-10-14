@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<stores amount="1">
+<stores amount="3">
+    <store name="Goodreads" selected="false"/>
     <store name="Ozon" selected="true"/>
+    <store name="Amazon" selected="true"/>
 </stores>

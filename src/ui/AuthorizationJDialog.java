@@ -4,10 +4,10 @@
  */
 package ui;
 
-import business.User;
-import db.UserMapper;
 import java.sql.SQLException;
 import javax.swing.JOptionPane;
+import logic.User;
+import service.UserService;
 
 /**
  *
@@ -15,15 +15,13 @@ import javax.swing.JOptionPane;
  */
 public class AuthorizationJDialog extends javax.swing.JDialog {
 
-    public String login;
-    public String password;
     public User user;
     
     /**
      * Creates new form AuthorizationJDialog
      */
     public AuthorizationJDialog(java.awt.Frame parent, boolean modal) {
-	super(parent, modal);
+	super(parent, "Авторизация", modal);
 	initComponents();
 	setLocationRelativeTo(parent);
     }
@@ -130,19 +128,18 @@ public class AuthorizationJDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
-        this.login = loginTField.getText();
-	this.password = String.valueOf(passwordPField.getPassword());
+        String login = loginTField.getText();
+	String password = String.valueOf(passwordPField.getPassword());
 	
-	UserMapper umapper = new UserMapper();
 	try {
-	    user = umapper.findByParam(UserMapper.UserParams.Login, login);
-	    if (user == null || !user.comparePassword(password)) {
-		JOptionPane.showMessageDialog(null, "Wrong login or password!", "Error",
+	    user = UserService.login(login, password);
+	    if (user == null) {
+		JOptionPane.showMessageDialog(null, "Authorization failed. Wrong login or password.", "Error",
 			JOptionPane.ERROR_MESSAGE, null);
 		return;
 	    }
 	} catch (SQLException ex) {
-	    JOptionPane.showMessageDialog(null, "Unexpected database error.", "Error",
+	    JOptionPane.showMessageDialog(null, "Authorization failed. Unexpected database error.", "Error",
 		    JOptionPane.ERROR_MESSAGE, null);
 	}
 	this.dispose();

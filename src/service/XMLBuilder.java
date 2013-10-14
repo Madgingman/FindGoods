@@ -4,7 +4,15 @@
  */
 package service;
 
-import business.HistoryEntry;
+import java.beans.XMLEncoder;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
@@ -21,6 +29,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import logic.HistoryEntry;
+import logic.Product;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -90,8 +100,8 @@ public class XMLBuilder {
     }
     
     
-    public static String createProperties(java.util.HashMap<String, Boolean> stores) 
-	    throws ParserConfigurationException, TransformerException {
+    public static String saveStoreProperties(Map<String, Boolean> stores, String filename) 
+	    throws ParserConfigurationException, TransformerException, FileNotFoundException {
 	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         Document dom = db.newDocument();
@@ -105,7 +115,15 @@ public class XMLBuilder {
 	    root.appendChild(heElem);
 	}
 	
-	return writeDocument(dom);
+	String xml = writeDocument(dom);
+	
+	if (filename != null && !filename.isEmpty()) {
+	    try (PrintWriter writer = new PrintWriter(filename)) {
+		writer.print(xml);
+	    }
+	}
+	
+	return xml;
     }
 
     private static Element createStoreEntryElement(Document dom, Entry<String, Boolean> entry) {
@@ -114,4 +132,38 @@ public class XMLBuilder {
 	store.setAttribute("selected", entry.getValue().toString());
 	return store;
     }
+
+    public static String saveProducts(List<Product> products, File file) 
+	    throws ParserConfigurationException, TransformerException, IOException {
+	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document dom = db.newDocument();
+        
+	Element root = dom.createElement("products");
+	root.setAttribute("amount", (new Integer(products.size())).toString());
+        dom.appendChild(root);
+        
+	for (Product product : products) {
+	    Element heElem = product.toXML(dom);
+	    root.appendChild(heElem);
+	}
+	
+	String xml = writeDocument(dom);
+	
+	if (file != null) {
+	    try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(file)))) {
+		writer.print(xml);
+	    }
+	}
+	
+	return xml;
+    }
+
+    public static void saveProductList(List<Product> products, String filename)
+	    throws FileNotFoundException {
+	try (XMLEncoder encoder = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(filename)))) {
+	    encoder.writeObject(products);
+	}
+    }
+
 }

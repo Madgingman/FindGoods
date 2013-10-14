@@ -15,19 +15,12 @@ import java.sql.SQLException;
 public class ConnectionManager {
     private static final String url = "jdbc:derby://localhost:1527/findgoods";
     private static final String user = "fguser";
-    private static final String password = "iampassword";
-    
-    private static final ConnectionManager instance = new ConnectionManager();
-    
-    private ConnectionManager() {
-    }
-    
-    public static ConnectionManager getInstance() {
-	return instance;
-    }
+    private static final String password = "123";
 
     public Connection getConnection() throws SQLException {
-	return DriverManager.getConnection(url /*+ ";create=true"*/, user, password);
+	Connection conn = DriverManager.getConnection(url /*+ ";create=true"*/, user, password);
+	conn.setAutoCommit(true);
+	return conn;
     }
 
     public void closeConnection(Connection connection) throws SQLException {

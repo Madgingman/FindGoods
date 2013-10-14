@@ -19,13 +19,13 @@ public abstract class AbstractMapper<T> {
     public AbstractMapper() {
     }
 
-    protected abstract void insert(T object) throws SQLException;
-    protected abstract void update(T object) throws SQLException;
-    protected abstract void delete(T object) throws SQLException;
-    protected abstract T find(long id) throws SQLException;
+    public abstract int insert(T object) throws SQLException;
+    public abstract void update(T object) throws SQLException;
+    public abstract void delete(T object) throws SQLException;
+    public abstract T find(long id) throws SQLException;
     protected abstract List<T> getElementsFromResultSet(ResultSet rset) throws SQLException;
     
     protected Connection getConnection() throws SQLException {
-	return ConnectionManager.getInstance().getConnection();
+	return new ConnectionManager().getConnection();
     }
 }

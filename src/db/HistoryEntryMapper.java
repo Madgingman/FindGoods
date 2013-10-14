@@ -4,11 +4,10 @@
  */
 package db;
 
-import business.HistoryEntry;
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import logic.HistoryEntry;
 
 /**
  *
@@ -20,43 +19,62 @@ public class HistoryEntryMapper extends AbstractMapper<HistoryEntry> {
     }
 
     @Override
-    public void insert(HistoryEntry historyEntry) throws SQLException {
-	try (Connection conn = getConnection()) {
-	    try (PreparedStatement statement = getInsertStatement(historyEntry, conn)) {
-		statement.executeUpdate();
+    public int insert(HistoryEntry historyEntry) throws SQLException {
+	try (Connection conn = getConnection(); PreparedStatement statement = getInsertStatement(historyEntry, conn)) {
+	    statement.executeUpdate();
+	    try (ResultSet keys = statement.getGeneratedKeys()) {
+		if (keys == null || !keys.next()) {
+		    return -1;
+		}
+		return keys.getInt(1);
 	    }
 	}
     }
 
     @Override
     public void update(HistoryEntry historyEntry) throws SQLException {
-	try (Connection conn = getConnection()) {
-	    try (PreparedStatement statement = getUpdateStatement(historyEntry, conn)) {
-		statement.executeUpdate();
-	    }
+	try (Connection conn = getConnection(); PreparedStatement statement = getUpdateStatement(historyEntry, conn)) {
+	    statement.executeUpdate();
 	}
     }
 
     @Override
     public void delete(HistoryEntry historyEntry) throws SQLException {
 	String query = "DELETE FROM SearchHistory WHERE Id = ?";
+	
 	try (PreparedStatement statement = getConnection().prepareStatement(query)) {
 	    statement.setLong(1, historyEntry.getId());
 	    statement.executeUpdate();
 	}
     }
 
+    public HistoryEntry find(String word) throws SQLException {
+	String query = "SELECT * FROM SearchHistory WHERE Query = ?";
+	
+	try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+	    statement.setString(1, word);
+	    try (ResultSet rset = statement.executeQuery()) {
+		List<HistoryEntry> history = getElementsFromResultSet(rset);
+		if (history != null && !history.isEmpty()) {
+		    return history.get(0);
+		}
+		return null;
+	    }
+	}
+    }
+    
     @Override
     public HistoryEntry find(long id) throws SQLException {
 	String query = "SELECT * FROM SearchHistory WHERE Id = ?";
 	try (PreparedStatement statement = getConnection().prepareStatement(query)) {
 	    statement.setLong(1, id);
-	    ResultSet rset = statement.executeQuery();
-	    List<HistoryEntry> history = getElementsFromResultSet(rset);
-	    if (history != null) {
-		return history.get(0);
+	    try (ResultSet rset = statement.executeQuery()) {
+		List<HistoryEntry> history = getElementsFromResultSet(rset);
+		if (history != null && !history.isEmpty()) {
+		    return history.get(0);
+		}
+		return null;
 	    }
-	    return null;
 	}
     }
     
@@ -64,8 +82,9 @@ public class HistoryEntryMapper extends AbstractMapper<HistoryEntry> {
 	String query = "SELECT * FROM SearchHistory ORDER BY Rating DESC FETCH FIRST ? ROWS ONLY";
 	try (PreparedStatement statement = getConnection().prepareStatement(query)) {
 	    statement.setInt(1, amount);
-	    ResultSet rset = statement.executeQuery();
-	    return getElementsFromResultSet(rset);
+	    try (ResultSet rset = statement.executeQuery()) {
+		return getElementsFromResultSet(rset);
+	    }
 	}
     }
     
@@ -75,7 +94,7 @@ public class HistoryEntryMapper extends AbstractMapper<HistoryEntry> {
 		+ "VALUES (?, ?, ?)";
 	PreparedStatement statement = null;
 	try {
-	    statement = conn.prepareStatement(query);
+	    statement = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 	    statement.setString(1, historyEntry.getQuery());
 	    statement.setDate(2, new java.sql.Date(historyEntry.getDate().getTime()));
 	    statement.setLong(3, historyEntry.getRating());

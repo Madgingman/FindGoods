@@ -4,10 +4,14 @@
  */
 package db;
 
-import business.Store;
+import logic.Store;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,17 +22,32 @@ import java.util.List;
 public class StoreMapper extends AbstractMapper<Store> {
     
     public enum StoreParams {
-	Name, Url;
+	NAME("Name"),
+	URL("Url");
+	
+	private String value;
+	
+	private StoreParams(String value) {
+	    this.value = value;
+	}
+	
+	public String getValue() {
+	    return value;
+	}
     }
     
     public StoreMapper() {
     }
 
     @Override
-    public void insert(Store store) throws SQLException {
-	try (Connection conn = getConnection()) {
-	    try (PreparedStatement statement = getInsertStatement(store, conn)) {
-		statement.executeUpdate();
+    public int insert(Store store) throws SQLException {
+	try (Connection conn = getConnection(); PreparedStatement statement = getInsertStatement(store, conn)) {
+	    statement.executeUpdate();
+	    try (ResultSet keys = statement.getGeneratedKeys()) {
+		if (keys == null || !keys.next()) {
+		    return -1;
+		}
+		return keys.getInt(1);
 	    }
 	}
     }
@@ -45,35 +64,19 @@ public class StoreMapper extends AbstractMapper<Store> {
     @Override
     public void delete(Store store) throws SQLException {
 	String query = "DELETE FROM Stores WHERE Id = ?";
-	try (Connection conn = getConnection()) {
-	    try (PreparedStatement statement = conn.prepareStatement(query)) {
-		statement.setLong(1, store.getId());
-		statement.executeUpdate();
-	    }
+	try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement(query)) {
+	    statement.setLong(1, store.getId());
+	    statement.executeUpdate();
 	}
     }
 
     @Override
     public Store find(long id) throws SQLException {
 	String query = "SELECT * FROM Stores WHERE Id = ?";
-	try (Connection conn = getConnection()) {
-	    try (PreparedStatement statement = conn.prepareStatement(query)) {
-		statement.setLong(1, id);
-		ResultSet rset = statement.executeQuery();
-		List<Store> stores = getElementsFromResultSet(rset);
-		if (stores != null) {
-		    return stores.get(0);
-		}
-		return null;
-	    }
-	}
-    }
-    
-    public Store findByParam(StoreParams param, String value) throws SQLException {
-	String query = "SELECT * FROM Stores WHERE " + param.toString() + " = '" + value + "'";
-	try (Connection conn = getConnection()) {
-	    try (Statement statement = conn.createStatement()) {
-		ResultSet rset = statement.executeQuery(query);
+	
+	try (Connection conn = getConnection(); PreparedStatement statement = conn.prepareStatement(query)) {
+	    statement.setLong(1, id);
+	    try (ResultSet rset = statement.executeQuery()) {
 		List<Store> stores = getElementsFromResultSet(rset);
 		if (stores != null && !stores.isEmpty()) {
 		    return stores.get(0);
@@ -83,12 +86,36 @@ public class StoreMapper extends AbstractMapper<Store> {
 	}
     }
     
+    /**
+     * Finds store in database by specified parameter
+     * @param param one of the StoreMapper.StoreParams enumeration values
+     * @param value parameter's value
+     * @return	    Store object if store with the specified parameter exists, null otherwise
+     * @throws SQLException 
+     */
+    public Store findByParam(StoreParams param, String value) throws SQLException {
+	String query = "SELECT * FROM Stores WHERE " + param.getValue() + " = '" + value + "'";
+	
+	try (Connection conn = getConnection();
+		PreparedStatement statement = conn.prepareStatement(query.toString());
+		ResultSet rset = statement.executeQuery()) {
+//	    conn.setAutoCommit(false);
+//	    conn.commit();
+	    List<Store> stores = getElementsFromResultSet(rset);
+	    if (stores != null && !stores.isEmpty()) {
+		return stores.get(0);
+	    }
+	    return null;
+	}
+    }
+    
     private PreparedStatement getInsertStatement(Store store, Connection conn) throws SQLException {
 	String query = "INSERT INTO Stores(Name, Url, SearchUrl, PropertyFile) "
 		+ "VALUES (?, ?, ?, ?)";
+	
 	PreparedStatement statement = null;
 	try {
-	    statement = conn.prepareStatement(query);
+	    statement = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 	    statement.setString(1, store.getName());
 	    statement.setString(2, store.getUrl().toExternalForm());
 	    statement.setString(3, store.getSearchUrl().toExternalForm());

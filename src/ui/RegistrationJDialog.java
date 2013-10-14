@@ -4,10 +4,10 @@
  */
 package ui;
 
-import business.User;
-import db.UserMapper;
 import java.sql.SQLException;
 import javax.swing.JOptionPane;
+import logic.User;
+import service.UserService;
 
 /**
  *
@@ -21,7 +21,7 @@ public class RegistrationJDialog extends javax.swing.JDialog {
      * Creates new form RegistrationJDialog
      */
     public RegistrationJDialog(java.awt.Frame parent, boolean modal) {
-	super(parent, modal);
+	super(parent, "Регистрация новго пользователя", modal);
 	initComponents();
 	setLocationRelativeTo(parent);
     }
@@ -184,20 +184,22 @@ public class RegistrationJDialog extends javax.swing.JDialog {
             return;
         }
 
-        UserMapper umapper = new UserMapper();
         try {
-            user = umapper.findByParam(UserMapper.UserParams.Login, login);
-            if (user != null) {
+	    user = UserService.register(login, name, surname, email, password);
+            if (user == null) {
                 JOptionPane.showMessageDialog(null, "This login already exists.", "Error",
-                    JOptionPane.ERROR_MESSAGE, null);
-                return;
-            }
-	    user = new User(0, name, surname, email, login, password);
-	    umapper.insert(user);
-	    JOptionPane.showMessageDialog(null, "New user was sucessfully registered.", 
-		    "Success", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.ERROR_MESSAGE, null);
+		return;
+            } else {
+		JOptionPane.showMessageDialog(null, "User was sucessfully registered.",
+			"Success", JOptionPane.INFORMATION_MESSAGE);
+	    }
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(null, "Illegal parameters. Notice that name and login should be more than 3 characters length.", 
+		    "Error", JOptionPane.ERROR_MESSAGE, null);
+	    return;
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Unexpected database error. User wasn't registered", 
+            JOptionPane.showMessageDialog(null, "Registration failed. Unexpected database error.", 
 		    "Error", JOptionPane.ERROR_MESSAGE, null);
         }
         this.dispose();
