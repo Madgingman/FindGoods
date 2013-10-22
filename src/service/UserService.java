@@ -45,8 +45,8 @@ public class UserService {
      * @return 0 if store was added successfully, -1 otherwise
      * @throws SQLException 
      */
-    public static void addUser(User user) throws SQLException {
-	new UserMapper().insert(user);
+    public static int addUser(User user) throws SQLException {
+	return new UserMapper().insert(user);
     }
     
     public static void removeUser(Long userId) throws SQLException {

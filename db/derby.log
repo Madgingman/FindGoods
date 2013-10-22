@@ -1,0 +1,11 @@
+Tue Oct 22 10:09:43 GMT+04:00 2013 : Сетевой сервер Apache Derby Network Server - 10.8.1.2 - (1095077) запущен и готов принимать соединения на порту 1527 на {3} 
+----------------------------------------------------------------
+Tue Oct 22 10:09:44 GMT+04:00 2013:
+ Производится загрузка Derby версии The Apache Software Foundation - Apache Derby - 10.8.1.2 - (1095077): экземпляр a816c00e-0141-dec8-7f65-ffff99d86787
+в каталоге базы данных C:\Users\M\.netbeans-derby\findgoods  sun.misc.Launcher$AppClassLoader@3ecb800f 
+
+java.vendor=Oracle Corporation
+java.runtime.version=1.7.0_06-b24
+user.dir=C:\Program Files\glassfish-3.1.2.2\javadb
+derby.system.home=C:\Users\M\.netbeans-derby
+Запущен загрузчик классов базы данных - derby.database.classpath=''

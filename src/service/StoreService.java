@@ -35,13 +35,13 @@ public class StoreService {
      * @return 0 if store was added successfully, -1 otherwise
      * @throws SQLException 
      */
-    public static int addStore(Store store) throws SQLException {
+    public static long addStore(Store store) throws SQLException {
 	StoreMapper sm = new StoreMapper();
-	if (sm.findByParam(StoreMapper.StoreParams.NAME, store.getName()) != null) {
-	    return -1;
+	Store gotStore = sm.findByParam(StoreMapper.StoreParams.NAME, store.getName());
+	if (gotStore != null) {
+	    return gotStore.getId();
 	}
-	sm.insert(store);
-	return 0;
+	return sm.insert(store);
     }
     
     public static void removeStore(Store store) throws SQLException {

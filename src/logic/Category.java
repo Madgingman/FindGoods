@@ -4,6 +4,9 @@
  */
 package logic;
 
+import com.sun.org.apache.xpath.internal.operations.Equals;
+import java.util.Objects;
+
 /**
  *
  * @author M
@@ -52,4 +55,23 @@ public class Category {
     public void setName(String name) {
 	this.name = name;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+	if (obj instanceof Category) {
+	    Category category = (Category) obj;
+	    if (category.getName().equals(this.name)) {
+		return true;
+	    }
+	}
+	return false;
+    }
+
+    @Override
+    public int hashCode() {
+	int hash = 5;
+	hash = 71 * hash + Objects.hashCode(this.name);
+	return hash;
+    }
+
 }

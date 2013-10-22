@@ -90,7 +90,19 @@ public class ProductMapperTest {
     @After
     public void tearDown() {
 	try (Connection conn = new ConnectionManager().getConnection()) {
-	    String query = "DELETE FROM Products WHERE Products.Id = ? OR Products.Name = ?";
+	    String query = "DELETE FROM Rates WHERE Rates.ProductId = ?";
+	    try (PreparedStatement statement = conn.prepareStatement(query)) {
+		statement.setInt(1, productId);
+		statement.executeUpdate();
+	    }
+	    
+	    query = "DELETE FROM Favorites WHERE Favorites.ProductId = ?";
+	    try (PreparedStatement statement = conn.prepareStatement(query)) {
+		statement.setInt(1, productId);
+		statement.executeUpdate();
+	    }
+	    
+	    query = "DELETE FROM Products WHERE Products.Id = ? OR Products.Name = ?";
 	    try (PreparedStatement statement = conn.prepareStatement(query)) {
 		statement.setInt(1, productId);
 		statement.setString(2, PRODUCT_NAME);
@@ -146,7 +158,7 @@ public class ProductMapperTest {
 	mapper.update(product);
 	
 	product = mapper.find(productId);
-	assertFalse("Fail to update product", product.getName().equals(newName));
+	assertTrue("Fail to update product", product.getName().equals(newName));
     }
 
     /**

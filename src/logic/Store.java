@@ -5,6 +5,7 @@
 package logic;
 
 import java.net.URL;
+import java.util.Objects;
 
 /**
  *
@@ -54,6 +55,32 @@ public class Store {
     
     public void setId(long id) {
 	this.id = id;
+    }
+
+    public void setName(String name) {
+	this.name = name;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+	if (obj instanceof Store) {
+	    Store store = (Store) obj;
+	    if (store.getName().equals(this.name) && store.getUrl().equals(this.url)
+		    && store.getSearchUrl().equals(this.searchUrl) && store.getPropFile().equals(this.propFile)) {
+		return true;
+	    }
+	}
+	return false;
+    }
+
+    @Override
+    public int hashCode() {
+	int hash = 3;
+	hash = 53 * hash + Objects.hashCode(this.name);
+	hash = 53 * hash + Objects.hashCode(this.url);
+	hash = 53 * hash + Objects.hashCode(this.propFile);
+	hash = 53 * hash + Objects.hashCode(this.searchUrl);
+	return hash;
     }
 
 }

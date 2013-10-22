@@ -267,5 +267,9 @@ public class Product implements Serializable {
     public void setCategory(Category category) {
 	this.category = category;
     }
+
+    public void setId(int id) {
+	this.id = id;
+    }
     
 }

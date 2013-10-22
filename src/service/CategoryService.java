@@ -41,8 +41,8 @@ public class CategoryService {
 	return new CategoryMapper().find(id);
     }
     
-    public static void addCategory(Category category) throws SQLException {
-	new CategoryMapper().insert(category);
+    public static int addCategory(Category category) throws SQLException {
+	return new CategoryMapper().insert(category);
     }
     
     public static void updateCategory(Category category) throws SQLException {
